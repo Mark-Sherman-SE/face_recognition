@@ -1,0 +1,5 @@
+.idea
+__pycache__
+
+nn/data/aligned
+nn/data/default
