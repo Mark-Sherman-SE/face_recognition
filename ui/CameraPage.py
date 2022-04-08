@@ -1,17 +1,25 @@
 import tkinter
 import cv2
 import PIL.Image, PIL.ImageTk
+import torch
 import time
 
-from ui.SuccessPage import SuccessPage
+from .SuccessPage import SuccessPage
+from torchvision import transforms
+from constants import DEVICE
 
 
 class CameraPage:
-    def __init__(self, video_source=0):
+    def __init__(self, mtcnn, model, face_id, video_source=0):
         self.window = tkinter.Toplevel()
         self.window.grab_set()
         self.window.title("Camera")
+
         self.video_source = video_source
+        self.face_id = face_id
+        self.mtcnn = mtcnn
+        self.model = model
+        self.counter = 0
 
         # open video source (by default this will try to open the computer webcam)
         self.vid = MyVideoCapture(self.video_source)
@@ -29,6 +37,7 @@ class CameraPage:
 
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
+        self.transformation = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         self.update()
 
         self.window.mainloop()
@@ -45,8 +54,15 @@ class CameraPage:
         ret, frame = self.vid.get_frame()
 
         if ret:
-            self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
-            self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
+            face = self.mtcnn(frame)
+            if face is not None:
+                face_t = self.transformation(face)
+                face_t = face_t.to(DEVICE).unsqueeze(0)
+                pred = self.model(face_t)
+                _, id = torch.max(pred, 1)
+                self.counter += int(self.face_id == id)
+                self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
+                self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
         self.window.after(self.delay, self.update)
 
