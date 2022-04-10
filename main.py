@@ -13,7 +13,7 @@ from constants import *
 
 class MainPage:
     def __init__(self):
-        db = DB()
+        self.db = DB()
         self.root = tk.Tk()
         self.root.title("Main Page")
         self.root.grab_set()
@@ -29,12 +29,29 @@ class MainPage:
         self.model = InceptionResnetV1(classify=True, pretrained='vggface2', num_classes=len(directories)).to(DEVICE)
         self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
         self.model.eval()
-        tk.Button(self.root, text="Войти по логину", command=lambda : PasswordPage(login=self.login.get(), db=DB), width=50, height=1).grid(row=3, column=1)
-        tk.Button(self.root, text="Войти по камере", command=lambda: CameraPage(self.mtcnn, self.model, 11, db=DB, login=self.login.get()),
+        tk.Button(self.root, text="Войти по логину", command=lambda :self.check_login(login=self.login.get(), mode=True), width=50, height=1).grid(row=3, column=1)
+        tk.Button(self.root, text="Войти по камере", command=lambda: self.check_login(login=self.login.get(), mode=False),
                   width=50, height=1).grid(row=4, column=1)
 
         self.root.mainloop()
-        db.cursor.close()
+        self.db.cursor.close()
+
+    def check_login(self, login, mode):
+        try:
+            s = f"SELECT id FROM sqlitedb WHERE login={login}"
+
+            self.db.cursor.execute(s)
+            self.db.cursor.fetchone()
+
+            if mode:
+                PasswordPage(login=login, db=self.db)
+            else:
+                CameraPage(self.mtcnn, self.model, 11, db=self.db, login=login)
+
+
+        except:
+            print("Wrong login")
+
 
 
 MainPage()
