@@ -1,11 +1,13 @@
 import tkinter
 import tkinter as tk
 
+from DB import DB
 from ui.SuccessPage import SuccessPage
 
 
 class PasswordPage:
-    def __init__(self,login:str):
+    def __init__(self,login:str, db:DB):
+        self.db=db
         self.window = tkinter.Toplevel()
         self.window.grab_set()
         self.window.title("Password")
@@ -16,5 +18,14 @@ class PasswordPage:
                   height=1).grid(row=2, column=1)
 
     def login(self, login, password):
-        if login =="123" and password=="123":
-            SuccessPage()
+        s = f"SELECT password FROM sqlitedb WHERE login={login}"
+
+        self.db.cursor.execute(s)
+        pwd = self.db.cursor.fetchone()
+
+        s = f"SELECT name FROM sqlitedb WHERE login={login}"
+
+        self.db.cursor.execute(s)
+        name=self.db.cursor.fetchone()
+        if password==pwd:
+            SuccessPage(name=name)

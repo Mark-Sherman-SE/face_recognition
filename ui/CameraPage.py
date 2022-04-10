@@ -4,19 +4,30 @@ import PIL.Image, PIL.ImageTk
 import torch
 import time
 
+from DB import DB
 from .SuccessPage import SuccessPage
 from torchvision import transforms
 from constants import DEVICE
 
 
 class CameraPage:
-    def __init__(self, mtcnn, model, face_id, video_source=0):
+    def __init__(self, mtcnn, model, face_id,login, db:DB, video_source=0):
+        self.db=db
+        s = f"SELECT id FROM sqlitedb WHERE login={login}"
+
+        self.db.cursor.execute(s)
+        self.face_id = self.db.cursor.fetchone()
+        s = f"SELECT name FROM sqlitedb WHERE login={login}"
+
+        self.db.cursor.execute(s)
+        self. name= self.db.cursor.fetchone()
+
         self.window = tkinter.Toplevel()
         self.window.grab_set()
         self.window.title("Camera")
 
         self.video_source = video_source
-        self.face_id = face_id
+        # self.face_id = face_id
         self.mtcnn = mtcnn
         self.model = model
         self.counter = 0
@@ -53,7 +64,7 @@ class CameraPage:
                 self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
 
                 if self.counter == 5:
-                    SuccessPage()
+                    SuccessPage(name=self.name)
         self.window.after(self.delay, self.update)
 
 

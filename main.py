@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 
+from DB import DB
 from ui.CameraPage import CameraPage
 from ui.PasswordPage import PasswordPage
 
@@ -12,6 +13,7 @@ from constants import *
 
 class MainPage:
     def __init__(self):
+        db = DB()
         self.root = tk.Tk()
         self.root.title("Main Page")
         self.root.grab_set()
@@ -23,15 +25,16 @@ class MainPage:
             device=DEVICE
         )
         data_dir = os.path.join(DATA_ALIGNED, "test")
-        directories = [name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
+        directories = [0]*12#[name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
         self.model = InceptionResnetV1(classify=True, pretrained='vggface2', num_classes=len(directories)).to(DEVICE)
         self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
         self.model.eval()
-        tk.Button(self.root, text="Войти по логину", command=lambda : PasswordPage(login=self.login.get()), width=50, height=1).grid(row=3, column=1)
-        tk.Button(self.root, text="Войти по камере", command=lambda: CameraPage(self.mtcnn, self.model, 11),
+        tk.Button(self.root, text="Войти по логину", command=lambda : PasswordPage(login=self.login.get(), db=DB), width=50, height=1).grid(row=3, column=1)
+        tk.Button(self.root, text="Войти по камере", command=lambda: CameraPage(self.mtcnn, self.model, 11, db=DB, login=self.login.get()),
                   width=50, height=1).grid(row=4, column=1)
 
         self.root.mainloop()
+        db.cursor.close()
 
 
 MainPage()
