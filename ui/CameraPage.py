@@ -13,11 +13,11 @@ from constants import DEVICE
 class CameraPage:
     def __init__(self, mtcnn, model, face_id,login, db:DB, video_source=0):
         self.db=db
-        s = f"SELECT id FROM sqlitedb WHERE login={login}"
+        s = f"SELECT id FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
         self.face_id = self.db.cursor.fetchone()[0]
-        s = f"SELECT name FROM sqlitedb WHERE login={login}"
+        s = f"SELECT name FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
         self.name= self.db.cursor.fetchone()[0]

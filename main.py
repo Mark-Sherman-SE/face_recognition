@@ -38,7 +38,7 @@ class MainPage:
         self.db.cursor.close()
 
     def check_login(self, login, mode):
-        s = f"SELECT id FROM sqlitedb WHERE login={login}"
+        s = f"SELECT id FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
         if self.db.cursor.fetchone():

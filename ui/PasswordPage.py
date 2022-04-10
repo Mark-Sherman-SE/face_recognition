@@ -20,12 +20,12 @@ class PasswordPage:
                   height=1).grid(row=2, column=1)
 
     def login(self, login, password):
-        s = f"SELECT password FROM sqlitedb WHERE login={login}"
+        s = f"SELECT password FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
         pwd = self.db.cursor.fetchone()[0]
 
-        s = f"SELECT name FROM sqlitedb WHERE login={login}"
+        s = f"SELECT name FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
         name = self.db.cursor.fetchone()[0]
