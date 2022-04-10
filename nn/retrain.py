@@ -7,12 +7,12 @@ from nn.utils import get_test_transform, get_train_transform
 import os
 
 
-def retrain(batch_size=8, num_epochs=25, children_to_unfreeze=5, name="weights"):
+def retrain(batch_size=8, num_epochs=25, children_to_unfreeze=5, data_dir="nn/data/aligned", name="weights"):
     data_transforms = {
         'train': get_train_transform(),
         'test': get_test_transform(),
     }
-    data_dir = 'data/aligned'
+    #data_dir = 'data/aligned'
 
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                               data_transforms[x])

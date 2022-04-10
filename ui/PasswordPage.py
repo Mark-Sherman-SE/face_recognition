@@ -34,4 +34,4 @@ class PasswordPage:
         else:
             print(pwd)
             print(password)
-            FailPage()
+            FailPage(err_obj="password")

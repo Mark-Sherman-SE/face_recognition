@@ -26,11 +26,11 @@ class MainPage:
             device=DEVICE
         )
         data_dir = os.path.join(DATA_ALIGNED, "test")
-        directories = [0]*12#[name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
+        directories = [name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
         self.model = InceptionResnetV1(classify=True, pretrained='vggface2', num_classes=len(directories)).to(DEVICE)
-        # self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
+        self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
         self.model.eval()
-        tk.Button(self.root, text="Войти по логину", command=lambda :self.check_login(login=self.login.get(), mode=True), width=50, height=1).grid(row=3, column=1)
+        tk.Button(self.root, text="Войти по паролю", command=lambda :self.check_login(login=self.login.get(), mode=True), width=50, height=1).grid(row=3, column=1)
         tk.Button(self.root, text="Войти по камере", command=lambda: self.check_login(login=self.login.get(), mode=False),
                   width=50, height=1).grid(row=4, column=1)
 
@@ -45,9 +45,9 @@ class MainPage:
             if mode:
                 PasswordPage(login=login, db=self.db)
             else:
-                CameraPage(self.mtcnn, self.model, 11, db=self.db, login=login)
+                CameraPage(self.mtcnn, self.model, db=self.db, login=login)
         else:
-            FailPage()
+            FailPage(err_obj="login")
 
 
 

@@ -11,12 +11,12 @@ from constants import DEVICE
 
 
 class CameraPage:
-    def __init__(self, mtcnn, model, face_id,login, db:DB, video_source=0):
+    def __init__(self, mtcnn, model, login, db:DB, video_source=0):
         self.db=db
         s = f"SELECT id FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
-        self.face_id = self.db.cursor.fetchone()[0]
+        self.face_id = int(self.db.cursor.fetchone()[0])
         s = f"SELECT name FROM sqlitedb WHERE login='{login}'"
 
         self.db.cursor.execute(s)
@@ -39,14 +39,12 @@ class CameraPage:
         self.canvas = tkinter.Canvas(self.window, width=self.vid.width, height=self.vid.height)
         self.canvas.pack()
 
-
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.transformation = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         self.update()
 
         self.window.mainloop()
-
 
     def update(self):
         # Get a frame from the video source
@@ -55,15 +53,15 @@ class CameraPage:
         if ret:
             face = self.mtcnn(frame)
             if face is not None:
-                face_t = self.transformation(face)
+                face_t = self.transformation(face) # 1 * w * H * 3
                 face_t = face_t.to(DEVICE).unsqueeze(0)
                 pred = self.model(face_t)
                 _, id = torch.max(pred, 1)
                 self.counter += int(self.face_id == id)
                 self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
                 self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
-
-                if self.counter == 5:
+                #print(self.counter)
+                if self.counter == 20:
                     SuccessPage(name=self.name)
         self.window.after(self.delay, self.update)
 
