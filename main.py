@@ -3,6 +3,7 @@ import os
 
 from DB import DB
 from ui.CameraPage import CameraPage
+from ui.FailPage import FailPage
 from ui.PasswordPage import PasswordPage
 
 from nn.models.mtcnn import MTCNN
@@ -27,7 +28,7 @@ class MainPage:
         data_dir = os.path.join(DATA_ALIGNED, "test")
         directories = [0]*12#[name for name in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, name))]
         self.model = InceptionResnetV1(classify=True, pretrained='vggface2', num_classes=len(directories)).to(DEVICE)
-        self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
+        # self.model.load_state_dict(torch.load("result/weights/best_weights.pth"))
         self.model.eval()
         tk.Button(self.root, text="Войти по логину", command=lambda :self.check_login(login=self.login.get(), mode=True), width=50, height=1).grid(row=3, column=1)
         tk.Button(self.root, text="Войти по камере", command=lambda: self.check_login(login=self.login.get(), mode=False),
@@ -37,20 +38,17 @@ class MainPage:
         self.db.cursor.close()
 
     def check_login(self, login, mode):
-        try:
-            s = f"SELECT id FROM sqlitedb WHERE login={login}"
+        s = f"SELECT id FROM sqlitedb WHERE login={login}"
 
-            self.db.cursor.execute(s)
-            self.db.cursor.fetchone()
-
+        self.db.cursor.execute(s)
+        if self.db.cursor.fetchone():
             if mode:
                 PasswordPage(login=login, db=self.db)
             else:
                 CameraPage(self.mtcnn, self.model, 11, db=self.db, login=login)
+        else:
+            FailPage()
 
-
-        except:
-            print("Wrong login")
 
 
 

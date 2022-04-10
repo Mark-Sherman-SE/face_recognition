@@ -12,13 +12,13 @@ class DB:
                                             login TEXT,
                                             PASSWORD TEXT);'''
             cursor.execute(create_table)
+            list_users = [(1,"mrk","123","123")]
 
-            list_users = []
-
-            for id, name, login, password in list_users:
-                sqlite_insert_query = f"""INSERT INTO sqlitedb
-                                          (id,name,login,password text)  VALUES  ({id}, {name}, {login}, {password})"""
+            for id, nme, login, password in list_users:
+                sqlite_insert_query = f"INSERT INTO sqlitedb (id,name,login,password)  VALUES  ({id},'{nme}', '{login}', '{password}');"
                 cursor.execute(sqlite_insert_query)
+            sqlite_connection.commit()
+
         except:
             pass
 

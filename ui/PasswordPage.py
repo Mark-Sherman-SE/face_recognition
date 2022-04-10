@@ -2,6 +2,7 @@ import tkinter
 import tkinter as tk
 
 from DB import DB
+from ui.FailPage import FailPage
 from ui.SuccessPage import SuccessPage
 
 
@@ -22,11 +23,15 @@ class PasswordPage:
         s = f"SELECT password FROM sqlitedb WHERE login={login}"
 
         self.db.cursor.execute(s)
-        pwd = self.db.cursor.fetchone()
+        pwd = self.db.cursor.fetchone()[0]
 
         s = f"SELECT name FROM sqlitedb WHERE login={login}"
 
         self.db.cursor.execute(s)
-        name = self.db.cursor.fetchone()
+        name = self.db.cursor.fetchone()[0]
         if password == pwd:
             SuccessPage(name=name)
+        else:
+            print(pwd)
+            print(password)
+            FailPage()

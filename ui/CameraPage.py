@@ -16,11 +16,11 @@ class CameraPage:
         s = f"SELECT id FROM sqlitedb WHERE login={login}"
 
         self.db.cursor.execute(s)
-        self.face_id = self.db.cursor.fetchone()
+        self.face_id = self.db.cursor.fetchone()[0]
         s = f"SELECT name FROM sqlitedb WHERE login={login}"
 
         self.db.cursor.execute(s)
-        self. name= self.db.cursor.fetchone()
+        self.name= self.db.cursor.fetchone()[0]
 
         self.window = tkinter.Toplevel()
         self.window.grab_set()
