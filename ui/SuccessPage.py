@@ -1,9 +1,9 @@
 import tkinter as tk
 
 class SuccessPage:
-    def __init__(self):
+    def __init__(self, name):
         window = tk.Toplevel()
         window.grab_set()
         window.title("Success")
 
-        tk.Label(window, text="УРА", width=50,compound=tk.CENTER).grid(row=0, column=0)
+        tk.Label(window, text=f"Hi, {name}", width=50,compound=tk.CENTER).grid(row=0, column=0)

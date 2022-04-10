@@ -35,27 +35,28 @@ def process_video(path, person_name, save_path, test_size=0.25, info=False):
     num_of_frames = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
     test_frames = np.random.choice(num_of_frames, int(test_size * num_of_frames), replace=False) + count
 
-    for subfolder in ["test", "train"]:
-        if os.path.isdir(os.path.join(save_path, subfolder, person_name)):
-            files = glob.glob(os.path.join(save_path, subfolder, person_name, "/*.jpg"))
-            for file in files:
-                try:
-                    index = int(file.split("_")[-1])
-                except ValueError:
-                    continue
-                count = index if index > count else count
-
     if success:
-        pathlib.Path(f"{save_path}\\test\\{person_name}").mkdir(parents=True, exist_ok=True)
-        pathlib.Path(f"{save_path}\\train\\{person_name}").mkdir(parents=True, exist_ok=True)
-    while success:
-        folder = "test" if count in test_frames else "train"
-        is_written = cv2.imwrite(f"{save_path}\\{folder}\\{person_name}\\{person_name}_{str(format(count, '04d'))}.jpg",
-                                image)
-        if info:
-            print('Read a new frame: ', count, is_written)
-        success, image = vidcap.read()
-        count += 1
+        for subfolder in ["test", "train"]:
+            if os.path.isdir(os.path.join(save_path, subfolder, person_name)):
+                files = glob.glob(os.path.join(save_path, subfolder, person_name, "/*.jpg"))
+                for file in files:
+                    try:
+                        index = int(file.split("_")[-1])
+                    except ValueError:
+                        continue
+                    count = index if index > count else count
+
+
+            pathlib.Path(f"{save_path}\\test\\{person_name}").mkdir(parents=True, exist_ok=True)
+            pathlib.Path(f"{save_path}\\train\\{person_name}").mkdir(parents=True, exist_ok=True)
+        while success:
+            folder = "test" if count in test_frames else "train"
+            is_written = cv2.imwrite(f"{save_path}\\{folder}\\{person_name}\\{person_name}_{str(format(count, '04d'))}.jpg",
+                                    image)
+            if info:
+                print('Read a new frame: ', count, is_written)
+            success, image = vidcap.read()
+            count += 1
 
 
 def crop_images(person_name, train_path, test_path, target_dir="data/default/"):

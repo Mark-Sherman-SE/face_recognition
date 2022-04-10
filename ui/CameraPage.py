@@ -4,19 +4,30 @@ import PIL.Image, PIL.ImageTk
 import torch
 import time
 
+from DB import DB
 from .SuccessPage import SuccessPage
 from torchvision import transforms
 from constants import DEVICE
 
 
 class CameraPage:
-    def __init__(self, mtcnn, model, face_id, video_source=0):
+    def __init__(self, mtcnn, model, login, db:DB, video_source=0):
+        self.db=db
+        s = f"SELECT id FROM sqlitedb WHERE login='{login}'"
+
+        self.db.cursor.execute(s)
+        self.face_id = int(self.db.cursor.fetchone()[0])
+        s = f"SELECT name FROM sqlitedb WHERE login='{login}'"
+
+        self.db.cursor.execute(s)
+        self.name= self.db.cursor.fetchone()[0]
+
         self.window = tkinter.Toplevel()
         self.window.grab_set()
         self.window.title("Camera")
 
         self.video_source = video_source
-        self.face_id = face_id
+        # self.face_id = face_id
         self.mtcnn = mtcnn
         self.model = model
         self.counter = 0
@@ -28,26 +39,12 @@ class CameraPage:
         self.canvas = tkinter.Canvas(self.window, width=self.vid.width, height=self.vid.height)
         self.canvas.pack()
 
-        # Button that lets the user take a snapshot
-        self.btn_snapshot = tkinter.Button(self.window, text="Snapshot", width=50, command=self.snapshot)
-        self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
-
-        self.btn_success = tkinter.Button(self.window, text="Success", width=50, command=self.success_login)
-        self.btn_success.pack(anchor=tkinter.CENTER, expand=True)
-
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.transformation = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         self.update()
 
         self.window.mainloop()
-
-    def snapshot(self):
-        # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
-
-        if ret:
-            cv2.imwrite("frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     def update(self):
         # Get a frame from the video source
@@ -56,18 +53,18 @@ class CameraPage:
         if ret:
             face = self.mtcnn(frame)
             if face is not None:
-                face_t = self.transformation(face)
+                face_t = self.transformation(face) # 1 * w * H * 3
                 face_t = face_t.to(DEVICE).unsqueeze(0)
                 pred = self.model(face_t)
                 _, id = torch.max(pred, 1)
                 self.counter += int(self.face_id == id)
                 self.photo = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame))
                 self.canvas.create_image(0, 0, image=self.photo, anchor=tkinter.NW)
-
+                #print(self.counter)
+                if self.counter == 20:
+                    SuccessPage(name=self.name)
         self.window.after(self.delay, self.update)
 
-    def success_login(self):
-        SuccessPage()
 
 
 class MyVideoCapture:
